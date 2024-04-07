@@ -5,25 +5,24 @@ Members: Helia Mozaffari, Susmita Roy, Sandeep Neupane, Diego Sarmiento
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from wordcloud import WordCloud
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 
-# Load the data
-
+#1.Load the data into a pandas data frame.
 path = './src/Data6.csv'
-input_data = pd.read_csv(path, encoding='latin-1')
+input_data = pd.read_csv(path)
 
-# Data exploration
-
+#2.Carry out some basic data exploration and present your results.
 print(input_data.info())
 print(input_data.head())
+print(input_data.tail())
 print(input_data.shape)
-
 # Data distribution
-
 label_counts = input_data['Label'].value_counts()
-
 plt.figure(figsize=(6, 5))
 plt.bar(label_counts.index, label_counts.values, color=['green', 'red'])
 plt.title('Label distribution')
@@ -32,31 +31,48 @@ plt.ylabel('Count')
 plt.xticks(label_counts.index, ['No spam', 'Spam'], rotation=0)
 plt.show()
 
-# Word frequency
+#prepare data for modeling
+input_data = input_data.sample(frac=1)
+vectorizer = CountVectorizer()
+X_count = vectorizer.fit_transform(input_data['Body'])
+tfidf_transformer = TfidfTransformer()
+X_tfidf = tfidf_transformer.fit_transform(X_count)
+y = input_data['Label']
+train_size = int(0.75 * len(input_data))
 
-data = input_data[['Body']]
-spam_data = input_data[input_data['Label'] == 1]['Body']
-no_spam_data = input_data[input_data['Label'] == 0]['Body']
+X_train = X_tfidf[:train_size]
+X_test = X_tfidf[train_size:]
+y_train = y[:train_size]
+y_test = y[train_size:]
+print(input_data.Label)
 
-print(pd.Series(' '.join(spam_data).lower().split()).value_counts().head(10))
-print(pd.Series(' '.join(no_spam_data).lower().split()).value_counts().head(10))
+#train using naive bayes classifier
+classifier = MultinomialNB()
+classifier.fit(X_train, y_train)
 
-# Word cloud plot
+scores = cross_val_score(classifier, X_train, y_train, cv=5)
+print(f"Mean Accuracy: {scores.mean() * 100:.2f}%")
 
-spam_text = ' '.join(spam_data)
-no_spam_text = ' '.join(no_spam_data)
-spam_wordcloud = WordCloud(width=800, height=400, background_color='white').generate(spam_text)
-non_spam_wordcloud = WordCloud(width=800, height=400, background_color='white').generate(no_spam_text)
-
-plt.figure(figsize=(10, 6))
-plt.imshow(spam_wordcloud, interpolation='bilinear')
-plt.title('spam word cloud')
-plt.axis('off')
-plt.show()
+y_pred = classifier.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print(accuracy)
 
 
-plt.figure(figsize=(10, 6))
-plt.imshow(non_spam_wordcloud, interpolation='bilinear')
-plt.title('no spam word cloud')
-plt.axis('off')
-plt.show()
+#manually testing the model
+new_emails = [
+    "Hi, you won 500000 please enter credit card number.",
+    "Hello, This is a friendly reminder to pay your credit card balance by 21 of september",
+    "Hi, Thanks for your email.",
+    "Congratulations! You've won a free cruise to the Bahamas. Click here to claim your prize!"
+]
+
+X_new_emails = vectorizer.transform(new_emails)
+X_new_tfidf = tfidf_transformer.transform(X_new_emails)
+
+
+
+y_new_pred = classifier.predict(X_new_tfidf)
+
+for email, predicted_label in zip(X_new_emails, y_new_pred):
+    print(f"email: {email}")
+    print(f"Predicted Label: {predicted_label}")
