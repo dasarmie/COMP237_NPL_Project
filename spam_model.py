@@ -11,6 +11,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
+from wordcloud import WordCloud
 
 #1.Load the data into a pandas data frame.
 path = './src/Data6.csv'
@@ -33,6 +34,31 @@ plt.show()
 
 #prepare data for modeling
 input_data = input_data.sample(frac=1)
+
+#function to remove special characters
+def remove_special_characters(text):
+    pattern = r'[^a-zA-Z0-9\s]'  # Matches any character that is not alphanumeric or whitespace
+    pattern += r'|[\n]'  # Matches newline characters (\n)
+    cleaned_text = re.sub(pattern, '', text)
+    return cleaned_text
+
+#this code block generates word cloud before applying the remove_special_characters function
+text = ' '.join(input_data['Body'])
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+#applying the function
+input_data['Body'] = input_data['Body'].apply(lambda x: remove_special_characters(x))
+#same codeblock to generate word cloud after applying the function
+text = ' '.join(input_data['Body'])
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.show()
+
 vectorizer = CountVectorizer()
 X_count = vectorizer.fit_transform(input_data['Body'])
 tfidf_transformer = TfidfTransformer()
