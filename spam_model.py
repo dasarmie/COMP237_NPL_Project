@@ -12,11 +12,11 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from wordcloud import WordCloud
-
+from nltk.tokenize import word_tokenize
 from sklearn.metrics import confusion_matrix
 import numpy as np
 import re
-np.random.seed(20240412)
+np.random.seed(66)
 #1.Load the data into a pandas data frame.
 path = './src/Data6.csv'
 input_data = pd.read_csv(path)
@@ -28,13 +28,13 @@ print(input_data.tail())
 print(input_data.shape)
 # Data distribution
 label_counts = input_data['Label'].value_counts()
-plt.figure(figsize=(6, 5))
-plt.bar(label_counts.index, label_counts.values, color=['green', 'red'])
-plt.title('Label distribution')
-plt.xlabel('Label')
-plt.ylabel('Count')
-plt.xticks(label_counts.index, ['No spam', 'Spam'], rotation=0)
-plt.show()
+# plt.figure(figsize=(6, 5))
+# plt.bar(label_counts.index, label_counts.values, color=['green', 'red'])
+# plt.title('Label distribution')
+# plt.xlabel('Label')
+# plt.ylabel('Count')
+# plt.xticks(label_counts.index, ['No spam', 'Spam'], rotation=0)
+# plt.show()
 
 #prepare data for modeling
 input_data = input_data.sample(frac=1)
@@ -49,19 +49,19 @@ def remove_special_characters(text):
 #this code block generates word cloud before applying the remove_special_characters function
 text = ' '.join(input_data['Body'])
 wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-plt.figure(figsize=(10, 5))
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis('off')
-plt.show()
+# plt.figure(figsize=(10, 5))
+# plt.imshow(wordcloud, interpolation='bilinear')
+# plt.axis('off')
+# plt.show()
 #applying the function
 input_data['Body'] = input_data['Body'].apply(lambda x: remove_special_characters(x))
 #same codeblock to generate word cloud after applying the function
 text = ' '.join(input_data['Body'])
 wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
-plt.figure(figsize=(10, 5))
-plt.imshow(wordcloud, interpolation='bilinear')
-plt.axis('off')
-plt.show()
+# plt.figure(figsize=(10, 5))
+# plt.imshow(wordcloud, interpolation='bilinear')
+# plt.axis('off')
+# plt.show()
 
 vectorizer = CountVectorizer()
 X_count = vectorizer.fit_transform(input_data['Body'])
@@ -97,14 +97,12 @@ print(cm)
 #     "Hi, Thanks for your email.",
 #     "Congratulations! You've won a free cruise to the Bahamas. Click here to claim your prize!"
 # ]
-new_emails = ["Do you Have an Epson or Canon Printer?\
-Â \
-Â \
-        Do\
-        you Have an Inkjet or Laser Printer?Yes? Then we can SAVE\
+new_emails = [
+            "Do\
+        you Have a new House?Yes? Then we can SAVE\
         you $$$ Money!\
-Our High Quality Ink & Toner Cartridges come\
-        with a money-back guarantee, a 1-year\
+Our High Quality roofing system & HVAC\
+        comes with a money-back guarantee, a 1-year\
         Warranty*, and get FREE SHIPPING\
         on ALL orders!\
 and best of all...They Cost\
@@ -112,20 +110,38 @@ and best of all...They Cost\
         Retail Price!*Click here\
         to visit Our Website!*or Call us Toll-Free @\
         1-800-758-8084!\
-*90-day warranty on all remanufactured\
-        cartridges.Â \
-Â \
-You\
-                are receiving this special offer because you have provided\
-                permission to receive email communications regarding special\
-                online promotions or offers. If you feel you have received this\
-                message in error, or wish to be removed from our subscriber\
-                list, Click HERE\
-                and you will be removed within less than three business days.\
-                Thank You and sorry for any inconvenience.",
-            "Hello you have won free items in the lucky draw jackpot. We can save you money in your Linux system.\
-              Are you a Linux User? Do you like gaming\
-              "]
+              ",
+
+        "Thank You,Your payment was obtained from a purchased\
+        credit card, Reference # 1200-000-1.If you wish to unsubscribe from this list, please\
+        Click here and enter your \
+        reference number and credit card details into the box. If you have previously \
+        unsubscribed and are still receiving this message, you may email our \
+        Credit Card department, \
+        or call 1-888-123-4567, or write us at: Payment Team, 35 Progress Avenue, \
+        Toronto, ON, M1A9A9. \
+        2024 Web Credit Inc. All Rights Reserved.",
+
+        "Dear, I hope this email finds you well.\
+        Please take a look at the attachment that you requested.\
+        Looking forward to hear from you soon.",
+
+        "Hello,\
+        You have a new payment awaiting on your mortgage. \
+        Kindly get back to us with this email address.\
+        ",
+
+        "We have been trying to reach you.\ "
+        "Please see this new offer we have developed for your personalized interest.\
+        Only for this month, it is upto 80% free.\
+        Just go to our website and click Buy Now\
+        ",
+
+        "Hi, This is a reminder for your meeting with your lawyer. Kindly confirm your availability for the meeting. \
+        Seats are filling soon. Please respond as soon as possible.\
+        "
+
+]
 
 X_new_emails = vectorizer.transform(new_emails)
 X_new_tfidf = tfidf_transformer.transform(X_new_emails)
