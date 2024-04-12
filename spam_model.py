@@ -13,6 +13,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from wordcloud import WordCloud
 
+from sklearn.metrics import confusion_matrix
+import numpy as np
+import re
+np.random.seed(20240412)
 #1.Load the data into a pandas data frame.
 path = './src/Data6.csv'
 input_data = pd.read_csv(path)
@@ -37,7 +41,7 @@ input_data = input_data.sample(frac=1)
 
 #function to remove special characters
 def remove_special_characters(text):
-    pattern = r'[^a-zA-Z0-9\s]'  # Matches any character that is not alphanumeric or whitespace
+    pattern = r'[^a-zA-Z0-9\s$#-%]'  # Matches any character that is not alphanumeric or whitespace
     pattern += r'|[\n]'  # Matches newline characters (\n)
     cleaned_text = re.sub(pattern, '', text)
     return cleaned_text
@@ -83,14 +87,45 @@ y_pred = classifier.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(accuracy)
 
-
+print("Confusion matrix")
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
 #manually testing the model
-new_emails = [
-    "Hi, you won 500000 please enter credit card number.",
-    "Hello, This is a friendly reminder to pay your credit card balance by 21 of september",
-    "Hi, Thanks for your email.",
-    "Congratulations! You've won a free cruise to the Bahamas. Click here to claim your prize!"
-]
+# new_emails = [
+#     "Hi, you won 500000 please enter credit card number.",
+#     "Hello, This is a friendly reminder to pay your credit card balance by 21 of september",
+#     "Hi, Thanks for your email.",
+#     "Congratulations! You've won a free cruise to the Bahamas. Click here to claim your prize!"
+# ]
+new_emails = ["Do you Have an Epson or Canon Printer?\
+Â \
+Â \
+        Do\
+        you Have an Inkjet or Laser Printer?Yes? Then we can SAVE\
+        you $$$ Money!\
+Our High Quality Ink & Toner Cartridges come\
+        with a money-back guarantee, a 1-year\
+        Warranty*, and get FREE SHIPPING\
+        on ALL orders!\
+and best of all...They Cost\
+         30-70%  Less        than\
+        Retail Price!*Click here\
+        to visit Our Website!*or Call us Toll-Free @\
+        1-800-758-8084!\
+*90-day warranty on all remanufactured\
+        cartridges.Â \
+Â \
+You\
+                are receiving this special offer because you have provided\
+                permission to receive email communications regarding special\
+                online promotions or offers. If you feel you have received this\
+                message in error, or wish to be removed from our subscriber\
+                list, Click HERE\
+                and you will be removed within less than three business days.\
+                Thank You and sorry for any inconvenience.",
+            "Hello you have won free items in the lucky draw jackpot. We can save you money in your Linux system.\
+              Are you a Linux User? Do you like gaming\
+              "]
 
 X_new_emails = vectorizer.transform(new_emails)
 X_new_tfidf = tfidf_transformer.transform(X_new_emails)
@@ -100,5 +135,5 @@ X_new_tfidf = tfidf_transformer.transform(X_new_emails)
 y_new_pred = classifier.predict(X_new_tfidf)
 
 for email, predicted_label in zip(X_new_emails, y_new_pred):
-    print(f"email: {email}")
-    print(f"Predicted Label: {predicted_label}")
+    print(f"email: \n{email}")
+    print(f"Predicted Label: {predicted_label} {'Spam' if predicted_label==1 else 'Not Spam'}")
