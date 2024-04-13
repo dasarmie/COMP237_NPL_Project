@@ -92,23 +92,15 @@ print(accuracy)
 print("Confusion matrix")
 cm = confusion_matrix(y_test, y_pred)
 print(cm)
-def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix', cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
+def plot_confusion_matrix(cm, title='Confusion matrix', cmap=plt.cm.Blues):
+
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
-    fmt = '.2f' if normalize else 'd'
     thresh = cm.max() / 2.
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            plt.text(j, i, format(cm[i, j], fmt),
+            plt.text(j, i, format(cm[i, j], 'd'),
                      ha="center", va="center",
                      color="white" if cm[i, j] > thresh else "black")
 
@@ -117,13 +109,12 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='Confusion matrix'
     plt.xlabel('Predicted label')
 
 class_names = ['No spam', 'Spam']
-plot_confusion_matrix(cm, classes=class_names)
+plot_confusion_matrix(cm)
 plt.show()
 #manually testing the model
 
 new_emails = [
         "You have an upcoming meetup scheduled at Toronto, Ontario.\
-        Check Meetup for details.\
         To unsubscribe from this group, send an email to:",
 
         "Hi all.\
@@ -133,10 +124,12 @@ new_emails = [
 
         "Hi, I'm looking to build a completely silent pc. It's gonna be a gateway for a wireless network and will sit in my room (as my room is only spitting distance from the chimney where i'll be mounting the aerial)"
         ,
+
         "I will be out of the office starting  04/12/2024 and will not return until 04/20/2024. I am out of the office until Tuesday 20th April.   I will reply to messages on my return.Thank you."
         ,
-        "We have been trying to reach you.\ "
-        "Please see this new offer we have developed for your personalized interest.\
+
+        "We have been trying to reach you.\
+        Please see this new offer we have developed for your personalized interest.\
         Only for this month, it is upto 80% free.\
         Just go to our website and click Buy Now\
         ",
